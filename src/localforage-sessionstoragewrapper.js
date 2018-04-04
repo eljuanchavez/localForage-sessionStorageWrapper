@@ -78,23 +78,10 @@
         self._dbInfo = dbInfo;
 
         var serializerPromise = new Promise(function(resolve, reject) {
-
-            // add support for localforage v1.3.x
-            if (typeof self.getSerializer === 'function') {
-                self.getSerializer().then(resolve, reject);
-                return;
+            if (!self || typeof self.getSerializer !== 'function') {
+                return reject();
             }
-
-            // We allow localForage to be declared as a module or as a
-            // library available without AMD/require.js.
-            if (moduleType === ModuleType.DEFINE) {
-                require(['localforageSerializer'], resolve);
-            } else if (moduleType === ModuleType.EXPORT) {
-                // Making it browserify friendly
-                resolve(require('./../utils/serializer'));
-            } else {
-                resolve(globalObject.localforageSerializer);
-            }
+            resolve(self.getSerializer());
         });
 
         return serializerPromise.then(function(lib) {
